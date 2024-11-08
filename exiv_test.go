@@ -1,13 +1,14 @@
 package goexiv_test
 
 import (
-	"github.com/kolesa-team/goexiv"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"runtime"
 	"sync"
 	"testing"
+
+	"github.com/phamthuonghai/goexiv"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOpenImage(t *testing.T) {
@@ -503,6 +504,22 @@ func TestXmpStripKey(t *testing.T) {
 	//
 	//_, err = data.GetString("Xmp.dc.description")
 	//require.Error(t, err)
+}
+
+func TestSetICCProfile(t *testing.T) {
+	img, err := goexiv.Open("testdata/image_srgb.jpeg")
+	require.NoError(t, err)
+
+	iccProfile, err := ioutil.ReadFile("testdata/profile.icc")
+	require.NoError(t, err)
+
+	err = img.SetICCProfile(iccProfile)
+	require.NoError(t, err)
+
+	err = img.ReadMetadata()
+	require.NoError(t, err)
+
+	assert.Equal(t, iccProfile, img.ICCProfile())
 }
 
 func BenchmarkImage_GetBytes_KeepAlive(b *testing.B) {

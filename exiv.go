@@ -258,3 +258,20 @@ func (i *Image) StripKey(f MetadataFormat, key string) error {
 
 	return nil
 }
+
+func (i *Image) SetICCProfile(data []byte) error {
+	cData := C.CBytes(data)
+	defer C.free(cData)
+
+	var cerr *C.Exiv2Error
+
+	C.exiv2_image_set_icc_profile(i.img, (*C.uchar)(cData), C.long(len(data)), &cerr)
+
+	if cerr != nil {
+		err := makeError(cerr)
+		C.exiv2_error_free(cerr)
+		return err
+	}
+
+	return nil
+}
